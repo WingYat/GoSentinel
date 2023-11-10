@@ -36,3 +36,14 @@ func JwtMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// JWT鉴权
+func AuthRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 检查用户是否登录，例如通过JWT或Session
+		// 如果未登录，重定向到登录页面
+		c.Redirect(302, "/login")
+		c.Abort()
+		return
+	}
+}

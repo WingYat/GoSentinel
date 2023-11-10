@@ -9,10 +9,9 @@
 package router
 
 import (
-	"GoSentinel/api/controller"
-	"GoSentinel/api/middleware"
+	"GoSentinel/internal/controller"
+	"GoSentinel/internal/middleware"
 	"github.com/gin-gonic/gin"
-	// 其他导入...
 )
 
 func InitRouter() *gin.Engine {
@@ -24,6 +23,14 @@ func InitRouter() *gin.Engine {
 
 	// JWT中间件
 	authMiddleware := middleware.JwtMiddleware()
+
+	router.LoadHTMLGlob("templates/*")
+
+	// 需要鉴权的路由
+	authGroup := router.Group("/").Use(middleware.AuthRequired())
+	{
+		authGroup.GET("/", controller.IndexPage)
+	}
 
 	// API路由组
 	apiGroup := router.Group("/api")

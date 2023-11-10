@@ -24,4 +24,5 @@ func main() {
 
 	r := router.InitRouter()
 	r.Run(viper.GetString("server.http_address") + ":" + viper.GetString("server.http_port"))
+
 }
