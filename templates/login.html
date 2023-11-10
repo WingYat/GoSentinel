@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录 - GoSentinel</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        .container { width: 300px; margin: 100px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        input[type=text], input[type=password] { width: 100%; padding: 10px; margin: 8px 0; display: inline-block; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background-color: #4CAF50; color: white; padding: 14px 20px; margin: 8px 0; border: none; cursor: pointer; width: 100%; }
+        button:hover { opacity: 0.8; }
+        .captcha-img { cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>登录到GoSentinel</h2>
+    <form action="/perform_login" method="post">
+        <label for="username"><b>用户名</b></label>
+        <input type="text" placeholder="输入用户名" name="username" required>
+
+        <label for="password"><b>密码</b></label>
+        <input type="password" placeholder="输入密码" name="password" required>
+
+        <label for="captcha"><b>验证码</b></label>
+        <input type="text" placeholder="输入验证码" name="captcha" required>
+        <img src="" id="captchaImage" class="captcha-img" onclick="refreshCaptcha()">
+        <button type="submit">登录</button>
+    </form>
+</div>
+
+<script>
+    function refreshCaptcha() {
+        fetch('/auth/captcha')
+            .then(response => response.json())
+            .then(data => {
+                var captchaImage = document.getElementById('captchaImage');
+                captchaImage.src = data.captchaImage;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // 初始加载验证码
+    window.onload = refreshCaptcha;
+</script>
+
+</body>
+</html>
