@@ -10,8 +10,8 @@
             margin: 0;
             padding: 0;
             display: flex;
-            align-items: center; /* 垂直居中 */
-            justify-content: center; /* 水平居中 */
+            align-items: center;
+            justify-content: center;
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
         }
@@ -23,7 +23,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
-            box-sizing: border-box; /* 确保padding不会影响容器的实际宽度 */
+            box-sizing: border-box;
         }
         h2 {
             color: #333;
@@ -76,22 +76,32 @@
             font-size: 12px;
             color: #666;
         }
+        .error-message {
+            color: red;
+            font-size: 0.8em;
+            display: none;
+        }
+        .input-error {
+            border-color: red;
+        }
     </style>
 </head>
 <body>
-
 <div class="container">
     <h2>集群管理系统</h2>
-    <form>
+    <form id="loginForm" action="/auth/login" method="post">
         <div class="form-group">
-            <input type="text" placeholder="Username" name="username" required autofocus autocomplete="username">
+            <input type="text" placeholder="Username" id="username" name="username" required autofocus autocomplete="username" maxlength="32">
+            <div class="error-message" id="username-error"></div>
         </div>
         <div class="form-group">
-            <input type="password" placeholder="Password" name="password" required autocomplete="current-password">
+            <input type="password" placeholder="Password" id="password" name="password" required autocomplete="current-password" maxlength="32">
+            <div class="error-message" id="password-error"></div>
         </div>
         <div class="form-group captcha-container">
-            <input type="text" class="captcha-input" placeholder="Captcha" name="captcha" required>
+            <input type="text" class="captcha-input" id="captcha" placeholder="Captcha" name="captcha" required pattern="^[0-9]{5}$">
             <img src="" id="captchaImage" class="captcha-img" onclick="refreshCaptcha()">
+            <div class="error-message" id="captcha-error"></div>
         </div>
         <button type="submit">Log In</button>
     </form>
@@ -102,31 +112,85 @@
 </div>
 
 <script>
+    var currentCaptchaId; // 变量来存储当前的验证码ID
+
     function refreshCaptcha() {
         fetch('/auth/captcha')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                // We expect 'data' to be an object with a 'captchaImage' property
-                // that contains a Base64-encoded string of the image.
                 var captchaImage = document.getElementById('captchaImage');
-                captchaImage.src = data.captchaImage; // Your API should send the correct data URI
+                captchaImage.src = data.captchaImage;
+                currentCaptchaId = data.captchaId;
             })
             .catch(error => {
-                console.error('Error fetching captcha:', error);
-                // Handle the error, like showing a default captcha image or a retry button
+                console.error('Error fetching new captcha:', error);
             });
     }
 
-    // Trigger the captcha refresh when the window loads
+    function validateInput(inputElement, errorElement, regex, errorMessage) {
+        if (!regex.test(inputElement.value)) {
+            inputElement.classList.add('input-error');
+            errorElement.textContent = errorMessage;
+            errorElement.style.display = 'block';
+        } else {
+            inputElement.classList.remove('input-error');
+            errorElement.style.display = 'none';
+        }
+    }
+
+    document.getElementById('username').addEventListener('input', function() {
+        validateInput(
+            this,
+            document.getElementById('username-error'),
+            /^[a-zA-Z0-9]{1,16}$/,
+            '用户名长度必须为 1-16 个字符，仅包含字母和数字。'
+        );
+    });
+
+    document.getElementById('password').addEventListener('input', function() {
+        validateInput(
+            this,
+            document.getElementById('password-error'),
+            /^.{6,32}$/,
+            '密码长度必须为 6-32 个字符。'
+        );
+    });
+
+    document.getElementById('captcha').addEventListener('input', function() {
+        validateInput(
+            this,
+            document.getElementById('captcha-error'),
+            /^[0-9]{5}$/,
+            '验证码必须是5位数字。'
+        );
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+        formData.append('captchaId', currentCaptchaId);
+
+        fetch('/auth/login', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json()) // 解析JSON响应
+        .then(data => {
+            if (data.code !== 0) {
+                throw new Error(data.msg || 'ERROR');
+            }
+            // 登录成功，页面跳转到主页或其他指定页面
+            window.location.href = '/'; // 重定向到主页或其他页面
+        })
+        .catch(error => {
+            alert('ERROR: ' + error.message);
+            refreshCaptcha();
+        });
+    });
+
     window.onload = refreshCaptcha;
 </script>
-
-
 
 </body>
 </html>

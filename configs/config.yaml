@@ -7,7 +7,7 @@ mysql:
   charset: "utf8"
 
 logging:
-  level: "info"
+  level: "debug"
   max_age_days: 7
 
 server:
@@ -16,4 +16,6 @@ server:
   app_name: "GoSentinel"
   agent_port: 9999
 
-jwt_secret: "YourSuperSecretKey"
+jwt:
+  secret: "SUkYUQo62eeGuULE8apNaZMLZGPPfMdI"
+  expiration_hours: 8

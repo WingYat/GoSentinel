@@ -15,7 +15,7 @@ import (
 )
 
 func InitRouter() *gin.Engine {
-	router := gin.New()
+	router := gin.Default()
 
 	// 全局中间件
 	//router.Use(gin.Logger())
@@ -26,16 +26,14 @@ func InitRouter() *gin.Engine {
 
 	router.LoadHTMLGlob("./templates/*")
 
-	router.GET("/", middleware.AuthRequired())
+	router.GET("/", middleware.CheckJWTAndRespond(), controller.IndexPage)
 	router.GET("/login", controller.LoginPage)
 
 	// 登录认证路由组
 	authGroup := router.Group("/auth")
 	{
-		//authGroup.GET("/login", controller.LoginPage)
-		//authGroup.POST("/login", controller.PerformLogin)
+		authGroup.POST("/login", controller.LoginHandler)
 		authGroup.GET("/captcha", controller.GenerateCaptcha)
-		authGroup.POST("/captcha/verify", controller.VerifyCaptcha)
 	}
 
 	// API路由组

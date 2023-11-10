@@ -20,22 +20,15 @@ var store = base64Captcha.DefaultMemStore
 func GenerateCaptcha(c *gin.Context) {
 	driver := base64Captcha.DefaultDriverDigit
 	captcha := base64Captcha.NewCaptcha(driver, store)
-	id, b64s, err := captcha.Generate()
+	captchaId, captchaImage, err := captcha.Generate()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "生成验证码失败"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"captchaId": id, "captchaImage": b64s})
+	c.JSON(http.StatusOK, gin.H{"captchaId": captchaId, "captchaImage": captchaImage})
 }
 
 // VerifyCaptcha 验证验证码
-func VerifyCaptcha(c *gin.Context) {
-	captchaId := c.PostForm("captchaId")
-	captchaValue := c.PostForm("captchaValue")
-
-	if store.Verify(captchaId, captchaValue, true) {
-		c.JSON(http.StatusOK, gin.H{"status": "success"})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"status": "failed"})
-	}
+func VerifyCaptcha(captchaId, captchaValue string) bool {
+	return store.Verify(captchaId, captchaValue, true)
 }

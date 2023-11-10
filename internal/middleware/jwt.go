@@ -13,19 +13,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"net/http"
-	"strings"
+	"strconv"
+	"time"
 	// 其他导入...
 )
 
 // JwtMiddleware 创建JWT认证中间件
 func JwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
+		tokenString, err := getTokenFromCookie(c)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			return
+		}
 
 		// 验证token逻辑...
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			// 需要返回用于验证JWT的密钥
-			jwtSecret := viper.GetString("jwt_secret")
+			jwtSecret := viper.GetString("jwt.secret")
 			return []byte(jwtSecret), nil
 		})
 
@@ -42,50 +47,74 @@ func JwtMiddleware() gin.HandlerFunc {
 	}
 }
 
-func AuthRequired() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 从请求中获取JWT令牌
-		jwtSecret := viper.GetString("jwt_secret")
-		tokenString := getTokenFromHeader(c)
+// GenerateJWT 生成JWT令牌
+func GenerateJWT(userID int) (string, error) {
+	// 从配置文件中读取密钥和令牌有效期
+	jwtSecret := viper.GetString("jwt.secret")
+	expirationHours := viper.GetInt("jwt.expiration_hours")
+	if expirationHours <= 0 {
+		expirationHours = 24 // 默认为24小时
+	}
 
-		// 检查令牌是否存在
-		if tokenString == "" {
-			redirectToLogin(c)
+	// 设置令牌有效期
+	expirationTime := time.Now().Add(time.Duration(expirationHours) * time.Hour)
+
+	// 创建JWT声明
+	claims := jwt.StandardClaims{
+		ExpiresAt: expirationTime.Unix(),
+		Subject:   strconv.Itoa(userID),
+	}
+
+	// 创建令牌
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// 签名并生成最终的JWT令牌
+	tokenString, err := token.SignedString([]byte(jwtSecret))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
+}
+
+// getTokenFromCookie 从Cookie中提取JWT令牌
+func getTokenFromCookie(c *gin.Context) (string, error) {
+	cookie, err := c.Cookie("jwt")
+	if err != nil {
+		return "", err
+	}
+	return cookie, nil
+}
+
+// SetTokenToCookie 设置JWT到Cookie
+func SetTokenToCookie(c *gin.Context, tokenString string, expiration time.Time) {
+	c.SetCookie("jwt", tokenString, int(expiration.Sub(time.Now()).Seconds()), "/", "", false, true)
+}
+
+func CheckJWTAndRespond() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString, err := getTokenFromCookie(c)
+		if err != nil {
+			// 如果没有找到cookie或cookie无效，重定向到登录页面
+			c.Redirect(http.StatusSeeOther, "/login")
+			c.Abort() // 中断请求处理链
 			return
 		}
 
-		// 验证JWT令牌
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// 返回用于验证的密钥
-			// 注意: 确保根据您的实际情况修改密钥获取方式
+			jwtSecret := viper.GetString("jwt.secret")
 			return []byte(jwtSecret), nil
 		})
 
 		if err != nil || !token.Valid {
-			redirectToLogin(c)
+			// 如果JWT解析失败或无效，重定向到登录页面
+			c.Redirect(http.StatusSeeOther, "/login")
+			c.Abort() // 中断请求处理链
 			return
 		}
 
-		// 继续处理请求
+		// JWT有效，设置用户信息并继续
+		claims := token.Claims.(jwt.MapClaims)
+		c.Set("userID", claims["id"])
 		c.Next()
 	}
-}
-
-// getTokenFromHeader 从请求头中提取JWT令牌
-func getTokenFromHeader(c *gin.Context) string {
-	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" {
-		return ""
-	}
-	parts := strings.SplitN(authHeader, " ", 2)
-	if !(len(parts) == 2 && parts[0] == "Bearer") {
-		return ""
-	}
-	return parts[1]
-}
-
-// redirectToLogin 重定向到登录页面
-func redirectToLogin(c *gin.Context) {
-	c.Redirect(http.StatusSeeOther, "/login")
-	c.Abort()
 }
