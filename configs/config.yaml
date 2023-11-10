@@ -1,0 +1,18 @@
+mysql:
+  host: "127.0.0.1"
+  port: 3306
+  user: "user"
+  password: "password"
+  dbname: "gosentinel"
+  charset: "utf8"
+
+logging:
+  level: "info"
+  max_age_days: 7
+
+server:
+  http_address: "0.0.0.0"
+  http_port: 80
+  app_name: "GoSentinel"
+  agent_port: 9999
+
