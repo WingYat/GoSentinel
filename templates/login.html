@@ -2,48 +2,131 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>登录 - GoSentinel</title>
+    <title>Login - GoSentinel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
-        .container { width: 300px; margin: 100px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-        input[type=text], input[type=password] { width: 100%; padding: 10px; margin: 8px 0; display: inline-block; border: 1px solid #ccc; box-sizing: border-box; }
-        button { background-color: #4CAF50; color: white; padding: 14px 20px; margin: 8px 0; border: none; cursor: pointer; width: 100%; }
-        button:hover { opacity: 0.8; }
-        .captcha-img { cursor: pointer; margin-top: 10px; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center; /* 垂直居中 */
+            justify-content: center; /* 水平居中 */
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            box-sizing: border-box; /* 确保padding不会影响容器的实际宽度 */
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type=text], input[type=password], .captcha-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .captcha-input {
+            flex-grow: 2;
+            margin-right: 10px;
+        }
+        .captcha-img {
+            cursor: pointer;
+            flex-grow: 1;
+            height: 38px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin-top: 8px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>登录到GoSentinel</h2>
-    <form action="/perform_login" method="post">
-        <label for="username"><b>用户名</b></label>
-        <input type="text" placeholder="输入用户名" name="username" required>
-
-        <label for="password"><b>密码</b></label>
-        <input type="password" placeholder="输入密码" name="password" required>
-
-        <label for="captcha"><b>验证码</b></label>
-        <input type="text" placeholder="输入验证码" name="captcha" required>
-        <img src="" id="captchaImage" class="captcha-img" onclick="refreshCaptcha()">
-        <button type="submit">登录</button>
+    <h2>集群管理系统</h2>
+    <form>
+        <div class="form-group">
+            <input type="text" placeholder="Username" name="username" required autofocus autocomplete="username">
+        </div>
+        <div class="form-group">
+            <input type="password" placeholder="Password" name="password" required autocomplete="current-password">
+        </div>
+        <div class="form-group captcha-container">
+            <input type="text" class="captcha-input" placeholder="Captcha" name="captcha" required>
+            <img src="" id="captchaImage" class="captcha-img" onclick="refreshCaptcha()">
+        </div>
+        <button type="submit">Log In</button>
     </form>
+    <div class="footer">
+        <p>&copy; 2023 <a href="https://github.com/WingYat/GoSentinel" target="_blank">GoSentinel</a>. All rights reserved.</p>
+        <p>Designed by <a href="https://github.com/WingYat" target="_blank">WingYat Cheung</a></p>
+    </div>
 </div>
 
 <script>
     function refreshCaptcha() {
         fetch('/auth/captcha')
-            .then(response => response.json())
-            .then(data => {
-                var captchaImage = document.getElementById('captchaImage');
-                captchaImage.src = data.captchaImage;
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
             })
-            .catch(error => console.error('Error:', error));
+            .then(data => {
+                // We expect 'data' to be an object with a 'captchaImage' property
+                // that contains a Base64-encoded string of the image.
+                var captchaImage = document.getElementById('captchaImage');
+                captchaImage.src = data.captchaImage; // Your API should send the correct data URI
+            })
+            .catch(error => {
+                console.error('Error fetching captcha:', error);
+                // Handle the error, like showing a default captcha image or a retry button
+            });
     }
 
-    // 初始加载验证码
+    // Trigger the captcha refresh when the window loads
     window.onload = refreshCaptcha;
 </script>
+
+
 
 </body>
 </html>
