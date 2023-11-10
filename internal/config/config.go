@@ -13,10 +13,9 @@ import (
 	"log"
 )
 
-func InitConfig() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("./configs")
+func InitConfig(configFilePath string) {
+	// 设置配置文件路径
+	viper.SetConfigFile(configFilePath)
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file: %s", err)

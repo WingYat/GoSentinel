@@ -1,5 +1,5 @@
 /**
- * @Auth: yycheung - win9yat.cheung@gmail.com
+ * @Auth: WingYat - win9yat.cheung@gmail.com
  * @Blog: https://www.gov-cn.cn
  * @Date: 9/11/2023 - 11:38 pm
  * @File: internal/logger/logger.go
@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"time"
 )
 

@@ -10,17 +10,28 @@ package main
 
 import (
 	"GoSentinel/internal/config"
-	"GoSentinel/internal/database"
 	"GoSentinel/internal/router"
-	"NetShieldControl/utils/log"
+	"flag"
 	"github.com/spf13/viper"
+	"log"
 )
 
 func main() {
-	// 初始化配置、日志与数据库
-	config.InitConfig()
-	log.InitLogger()
-	database.InitDatabase()
+	// 定义命令行参数
+	configPath := flag.String("config", "", "path to the config file")
+	flag.Parse()
+
+	// 检查配置文件路径是否已提供
+	if *configPath == "" {
+		log.Fatal("No config file path provided")
+	}
+
+	// 初始化配置
+	config.InitConfig(*configPath)
+
+	// 初始化日志与数据库
+	//logger.InitLogger()
+	//database.InitDatabase()
 
 	r := router.InitRouter()
 	r.Run(viper.GetString("server.http_address") + ":" + viper.GetString("server.http_port"))

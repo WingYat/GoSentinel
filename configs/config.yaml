@@ -16,3 +16,4 @@ server:
   app_name: "GoSentinel"
   agent_port: 9999
 
+jwt_secret: "YourSuperSecretKey"
