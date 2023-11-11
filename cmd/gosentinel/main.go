@@ -10,6 +10,7 @@ package main
 
 import (
 	"GoSentinel/internal/config"
+	"GoSentinel/internal/database"
 	"GoSentinel/internal/router"
 	"flag"
 	"github.com/spf13/viper"
@@ -31,7 +32,7 @@ func main() {
 
 	// 初始化日志与数据库
 	//logger.InitLogger()
-	//database.InitDatabase()
+	database.InitDatabase()
 
 	r := router.InitRouter()
 	r.Run(viper.GetString("server.http_address") + ":" + viper.GetString("server.http_port"))

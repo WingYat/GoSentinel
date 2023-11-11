@@ -11,9 +11,11 @@ package controller
 import (
 	"GoSentinel/internal/middleware"
 	"GoSentinel/internal/model"
-	"fmt"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 	"net/http"
 	"time"
 	// 导入其他需要的包
@@ -33,23 +35,33 @@ func LoginHandler(c *gin.Context) {
 	captchaId := c.PostForm("captchaId")
 	captchaValue := c.PostForm("captcha")
 	if !VerifyCaptcha(captchaId, captchaValue) {
-		fmt.Println("sb")
-		c.JSON(http.StatusOK, model.JsonResponse{
-			Code: -1,
-			Data: nil,
-			Msg:  "Captcha verification failed",
-		})
+		c.JSON(http.StatusUnauthorized, model.JsonResponse{Code: -1, Data: nil, Msg: "Captcha verification failed"})
+		return
+	}
+	// 获取用户信息
+	user, err := model.GetUserByUsername(form.Username)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// 用户名不存在
+			c.JSON(http.StatusUnauthorized, model.JsonResponse{-1, nil, "Username does not exist"})
+		} else {
+			// 其他数据库错误
+			c.JSON(http.StatusInternalServerError, model.JsonResponse{-1, nil, "Internal server error"})
+		}
 		return
 	}
 
-	// TODO: 验证用户名和密码
-	// 假设用户名和密码验证成功，并且获取到了userID
-	userID := 123 // 假设的用户ID
+	// 检查密码
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(form.Password)); err != nil {
+		// 密码不匹配
+		c.JSON(http.StatusUnauthorized, model.JsonResponse{-1, nil, "Invalid password"})
+		return
+	}
 
-	// 生成JWT令牌
-	tokenString, err := middleware.GenerateJWT(userID)
+	// 生成JWT令牌，使用数据库中查询到的用户ID
+	tokenString, err := middleware.GenerateJWT(user.ID) // 使用user.ID
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusInternalServerError, model.JsonResponse{-1, nil, "Failed to generate token"})
 		return
 	}
 

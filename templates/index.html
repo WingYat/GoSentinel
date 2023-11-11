@@ -1,19 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>主页面 - GoSentinel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoSentinel Dashboard</title>
     <style>
-      body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
-      .container { width: 300px; margin: 100px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        nav {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+        }
+        nav ul li {
+            margin-right: 20px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        #content {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #333;
+            color: white;
+        }
     </style>
-  </head>
-  <body>
-
-  <div class="container">
-    <h2>欢迎来到GoSentinel主控端</h2>
-    <p>Hello, world!</p>
-  </div>
-
-  </body>
-  </html>
+</head>
+<body>
+<nav>
+    <div class="logo">
+        GoSentinel
+    </div>
+    <ul>
+        <li><a href="#" id="home">主页</a></li>
+        <li><a href="#" id="clusterManagement">集群管理</a></li>
+        <!-- 更多导航项 -->
+    </ul>
+    <div class="user-info">
+        当前用户: <span id="current-user">用户名</span> | <a href="#" id="logout">退出</a>
+    </div>
+</nav>
+<div id="content">
+    <!-- 主内容区域 -->
+</div>
+<div class="footer">
+    &copy; 2023 GoSentinel. All rights reserved.
+</div>
+<script>
+    // 这里可以添加JavaScript来处理页面交互
+</script>
+</body>
+</html>

@@ -9,6 +9,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -33,6 +34,16 @@ func InitDatabase() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// 可以在这里添加数据库迁移代码
-	// 如：DB.AutoMigrate(&models.YourModel{})
+	fmt.Println("Database connection established")
+
+	// 数据库迁移
+	//err = DB.AutoMigrate(
+	//	&model.User{},
+	//	&model.Role{},
+	//	&model.Permission{},
+	//	// 添加其他模型
+	//)
+	//if err != nil {
+	//	log.Fatalf("Failed to migrate database: %v", err)
+	//}
 }
