@@ -50,7 +50,7 @@ Please visit [GoSentinel documentation](docs/main.md).
 * [WingYat Cheung](https://github.com/WingYat)
 
 ## License
-NetShieldControl is licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+GoSentinel is licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 # GoSentinel
 Linux process management tools based on golang development.

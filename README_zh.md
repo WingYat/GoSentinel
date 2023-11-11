@@ -50,7 +50,7 @@ $ nohup . /gosentinel --config=./config/config.yaml > /dev/null 2>&1 &
 * [WingYat Cheung](https://github.com/WingYat)
 
 ## 许可证
-NetShieldControl 采用 [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) 许可。
+GoSentinel 采用 [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) 许可。
 
 # GoSentinel
 基于golang开发的Linux流程管理工具。
